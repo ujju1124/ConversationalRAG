@@ -11,6 +11,7 @@ A production-ready FastAPI backend system with document ingestion and conversati
 - **Vector Search**: Semantic search using Pinecone vector database
 - **Local Embeddings**: Generate embeddings locally using sentence-transformers
 
+
 ## Tech Stack
 
 - **FastAPI**: Modern web framework for building APIs
@@ -97,77 +98,7 @@ Upload a PDF or TXT file and generate embeddings.
   - `fixed`: 500 character chunks with 50 character overlap
   - `sentence`: Sentence-based chunking using NLTK
 
-**Example Request**:
 
-```bash
-curl -X POST "http://localhost:8000/ingest?strategy=sentence" \
-  -H "Content-Type: multipart/form-data" \
-  -F "file=@document.pdf"
-```
-
-**Example Response**:
-
-```json
-{
-  "document_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-  "filename": "document.pdf",
-  "chunk_count": 42,
-  "strategy": "sentence"
-}
-```
-
-### 2. Conversational RAG API
-
-**Endpoint**: `POST /chat`
-
-Chat with a document using retrieval-augmented generation.
-
-**Request Body**:
-
-```json
-{
-  "session_id": "user123-session",
-  "user_message": "What are the main topics discussed?",
-  "document_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-}
-```
-
-**Example Request**:
-
-```bash
-curl -X POST "http://localhost:8000/chat" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "session_id": "user123-session",
-    "user_message": "What are the main topics discussed?",
-    "document_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-  }'
-```
-
-**Example Response (without booking)**:
-
-```json
-{
-  "response": "Based on the context, the main topics discussed are...",
-  "session_id": "user123-session",
-  "booking": null
-}
-```
-
-**Example Response (with booking)**:
-
-```json
-{
-  "response": "I'd be happy to schedule an interview for you...",
-  "session_id": "user123-session",
-  "booking": {
-    "name": "John Doe",
-    "email": "john@example.com",
-    "date": "2024-03-15",
-    "time": "2:00 PM"
-  }
-}
-```
 
 ## Booking Detection
 
@@ -219,15 +150,105 @@ When detected, it extracts structured information (name, email, date, time) and 
 - `time`
 - `created_at`
 
-## Development Notes
 
-- All functions include type annotations and docstrings
-- Pydantic models enforce request/response validation
-- Environment variables loaded via pydantic-settings
-- Async endpoints where applicable
-- Comprehensive error handling with HTTP status codes
-- No LangChain RetrievalQAChain - manual retrieval implementation
-- Local embeddings (no external API calls for embeddings)
+## 🎬 Demo output (verified)
+
+### 1. Health Check
+
+Test if the server is running:
+
+```bash
+curl http://localhost:8000/
+```
+
+**Response:**
+```json
+{
+  "status": "online",
+  "message": "Conversational RAG Backend API is running",
+  "endpoints": ["/ingest", "/chat"]
+}
+```
+
+### 2. Document Ingestion
+
+Upload `sample_document.txt` with sentence-based chunking:
+
+```bash
+curl -X POST "http://localhost:8000/ingest?strategy=sentence" \
+  -F "file=@sample_document.txt"
+```
+
+**Response:**
+```json
+{
+  "document_id": "6197dd2c-44f1-4456-a0fe-7ec321f10e35",
+  "filename": "sample_document.txt",
+  "chunk_count": 21,
+  "strategy": "sentence"
+}
+```
+
+✅ **What happened**: Document was split into 21 sentences, embedded into 384-dimensional vectors, and stored in Pinecone.
+
+### 3. Chat Query
+
+Ask a question about the uploaded document:
+
+```bash
+curl -X POST "http://localhost:8000/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "demo-session",
+    "user_message": "What is machine learning?",
+    "document_id": "6197dd2c-44f1-4456-a0fe-7ec321f10e35"
+  }'
+```
+
+**Response:**
+```json
+{
+  "response": "Machine learning is a subset of AI that enables systems to learn and improve from experience. There are three main types: supervised learning (which uses labeled data to train models), unsupervised learning (which finds hidden patterns in unlabeled data), and reinforcement learning (which trains agents through rewards and penalties).",
+  "session_id": "demo-session",
+  "booking": null
+}
+```
+
+✅ **What happened**: System retrieved top 5 relevant chunks from Pinecone, sent them to Groq LLM with the question, and returned a contextual answer.
+
+### 4. Booking Detection
+
+Send a booking request:
+
+```bash
+curl -X POST "http://localhost:8000/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "session_id": "demo-session",
+    "user_message": "I want to schedule an interview for Alice Smith at alice@example.com on Friday at 3 PM",
+    "document_id": "6197dd2c-44f1-4456-a0fe-7ec321f10e35"
+  }'
+```
+
+**Response:**
+```json
+{
+  "response": "Interview has been scheduled for Alice Smith at alice@example.com on Friday at 3 PM. We will respond within 24 hours to confirm the appointment.",
+  "session_id": "demo-session",
+  "booking": {
+    "name": "Alice Smith",
+    "email": "alice@example.com",
+    "date": "Friday",
+    "time": "3 PM"
+  }
+}
+```
+
+✅ **What happened**: System detected booking keywords ("schedule", "interview"), extracted structured information using LLM, and saved to SQLite database.
+
+
+
+
 
 ## License
 
