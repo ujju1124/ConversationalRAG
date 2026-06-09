@@ -11,8 +11,7 @@ def get_pinecone_index():
     index_name = settings.PINECONE_INDEX_NAME
     
     # Check if index exists, if not create it
-    # verify in official docs
-    existing_indexes = pc.list_indexes().names()
+    existing_indexes = [index.name for index in pc.list_indexes()]
     
     if index_name not in existing_indexes:
         pc.create_index(
