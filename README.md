@@ -172,12 +172,14 @@ curl http://localhost:8000/
 
 ### 2. Document Ingestion
 
-Upload `sample_document.txt` with sentence-based chunking:
+Upload the included `sample_document.txt` (AI/ML content) with sentence-based chunking:
 
 ```bash
 curl -X POST "http://localhost:8000/ingest?strategy=sentence" \
   -F "file=@sample_document.txt"
 ```
+
+> **Note**: `sample_document.txt` is included in the repository for easy testing.
 
 **Response:**
 ```json
