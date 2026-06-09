@@ -1,6 +1,6 @@
 # Conversational RAG Backend
 
-A production-ready FastAPI backend system with document ingestion and conversational RAG (Retrieval-Augmented Generation) capabilities. The system supports PDF and TXT file ingestion, semantic search using vector embeddings, and intelligent conversation with booking detection.
+A FastAPI backend system with document ingestion and conversational RAG (Retrieval-Augmented Generation) capabilities. The system supports PDF and TXT file ingestion, semantic search using vector embeddings, and intelligent conversation with booking detection.
 
 ## Features
 
