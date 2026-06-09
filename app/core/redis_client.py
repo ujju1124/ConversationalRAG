@@ -2,12 +2,14 @@
 import redis
 from app.core.config import settings
 
+# Parse the Redis URL
+redis_url = settings.UPSTASH_REDIS_URL
+
 # Initialize Redis client for Upstash
-redis_client = redis.Redis(
-    host=settings.UPSTASH_REDIS_URL.replace("redis://", "").replace("rediss://", "").split(":")[0],
-    port=int(settings.UPSTASH_REDIS_URL.split(":")[-1]) if ":" in settings.UPSTASH_REDIS_URL else 6379,
+# For newer redis-py versions, SSL is automatically handled via rediss:// URL
+redis_client = redis.from_url(
+    url=redis_url,
     password=settings.UPSTASH_REDIS_TOKEN,
-    ssl=True,
     decode_responses=True
 )
 
