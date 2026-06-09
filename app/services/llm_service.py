@@ -36,7 +36,7 @@ def build_rag_prompt(context_chunks: List[str], chat_history: List[dict], user_m
     return full_prompt
 
 
-def call_groq_api(prompt: str, model: str = "llama3-8b-8192") -> str:
+def call_groq_api(prompt: str, model: str = "llama-3.1-8b-instant") -> str:
     """Call Groq API for text generation."""
     
     response = groq_client.chat.completions.create(
