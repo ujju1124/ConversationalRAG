@@ -36,16 +36,28 @@ def build_rag_prompt(context_chunks: List[str], chat_history: List[dict], user_m
     return full_prompt
 
 
-def call_groq_api(prompt: str, model: str = "llama-3.1-8b-instant") -> str:
-    """Call Groq API for text generation."""
+def call_groq_api(prompt: str, model: str = "llama-3.1-8b-instant", json_mode: bool = False) -> str:
+    """Call Groq API for text generation.
+    
+    Args:
+        prompt: The prompt to send
+        model: Model to use (default: llama-3.1-8b-instant)
+        json_mode: If True, forces response to be valid JSON
+    """
+    
+    messages = [{"role": "user", "content": prompt}]
+    
+    # Add JSON mode if requested
+    extra_params = {}
+    if json_mode:
+        extra_params["response_format"] = {"type": "json_object"}
     
     response = groq_client.chat.completions.create(
         model=model,
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
+        messages=messages,
         temperature=0.7,
-        max_tokens=500
+        max_tokens=500,
+        **extra_params
     )
     
     return response.choices[0].message.content

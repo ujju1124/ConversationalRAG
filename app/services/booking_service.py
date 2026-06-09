@@ -19,11 +19,11 @@ def detect_booking_intent(user_message: str) -> bool:
 
 
 def extract_booking_info(conversation_messages: List[dict]) -> Optional[BookingData]:
-    """Extract booking information using Groq API."""
+    """Extract booking information using Groq API with robust JSON parsing."""
     
-    # Build conversation context (last 4 messages + current)
+    # Build conversation context (last 5 messages including current)
     conversation_text = ""
-    for msg in conversation_messages[-5:]:  # Last 5 messages including current
+    for msg in conversation_messages[-5:]:
         role = msg.get("role", "")
         content = msg.get("content", "")
         if role == "user":
@@ -31,38 +31,52 @@ def extract_booking_info(conversation_messages: List[dict]) -> Optional[BookingD
         elif role == "assistant":
             conversation_text += f"Assistant: {content}\n"
     
-    # Extraction prompt
-    extraction_prompt = f"""Extract the following fields from this conversation if present: name, email, date, time. Return as JSON only, no explanation. If a field is missing return null for that field.
+    # Improved extraction prompt with stricter instructions
+    extraction_prompt = f"""Extract booking information from this conversation.
 
 Conversation:
 {conversation_text}
 
-Return only valid JSON in this exact format:
-{{"name": "value or null", "email": "value or null", "date": "value or null", "time": "value or null"}}"""
+Extract these fields if present:
+- name: Full name of the person
+- email: Email address
+- date: Date of appointment (any format)
+- time: Time of appointment (any format)
+
+IMPORTANT: Return ONLY a valid JSON object with these exact keys. Use null for missing fields.
+Do not add explanations, markdown, or any other text.
+
+Required format:
+{{"name": null, "email": null, "date": null, "time": null}}"""
     
     try:
-        # Call Groq API for extraction
-        response = call_groq_api(extraction_prompt)
+        # Call Groq API for extraction WITH JSON MODE for guaranteed valid JSON
+        response = call_groq_api(extraction_prompt, json_mode=True)
         
-        # Parse JSON response
-        # Clean response to extract JSON
+        # With json_mode=True, Groq guarantees valid JSON
+        # Still clean whitespace
         response_clean = response.strip()
-        if "```json" in response_clean:
-            response_clean = response_clean.split("```json")[1].split("```")[0].strip()
-        elif "```" in response_clean:
-            response_clean = response_clean.split("```")[1].split("```")[0].strip()
         
-        booking_data = json.loads(response_clean)
+        # Parse JSON (should be clean now)
+        booking_dict = json.loads(response_clean)
         
-        # Create BookingData object
-        return BookingData(
-            name=booking_data.get("name"),
-            email=booking_data.get("email"),
-            date=booking_data.get("date"),
-            time=booking_data.get("time")
-        )
+        # Validate with Pydantic (this ensures type safety and validation)
+        # Pydantic will handle None/null values and validate the structure
+        booking_data = BookingData(**booking_dict)
+        
+        # Only return if at least one field is present
+        if all(v is None for v in [booking_data.name, booking_data.email, 
+                                     booking_data.date, booking_data.time]):
+            print("Booking extraction: All fields are null, returning None")
+            return None
+        
+        return booking_data
+        
+    except json.JSONDecodeError as e:
+        print(f"Booking extraction error: Invalid JSON - {e}")
+        print(f"Response was: {response_clean}")
+        return None
     except Exception as e:
-        # If extraction fails, return None
         print(f"Booking extraction error: {e}")
         return None
 
