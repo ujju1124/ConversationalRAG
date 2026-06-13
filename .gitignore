@@ -5,3 +5,42 @@ __pycache__/
 .DS_Store
 venv/
 .venv/
+
+# Utility MD files (for local reference only)
+CHECKLIST.md
+COMPLETE_PROGRAM_FLOW.md
+DATA_CHECK_GUIDE.md
+DEMO_SCREENSHOT_GUIDE.md
+FINAL_SUBMISSION_CHECKLIST.md
+FRONTEND_TESTING_GUIDE.md
+GETTING_STARTED.md
+HOW_TO_USE.md
+INTERVIEW_GUIDE.md
+INTERVIEW_PREP_INDEX.md
+MANUAL_TEST_GUIDE.md
+PROJECT_COMPARISON.md
+PROJECT_STATUS.md
+PROJECT_SUMMARY.md
+QUICK_INTERVIEW_PREP.md
+QUICK_START.md
+START_HERE.md
+SUBMISSION_VERIFICATION.md
+TALKING_POINTS.md
+UX_IMPROVEMENTS.md
+BUGFIXES_APPLIED.md
+ARCHITECTURE_DIAGRAM.md
+
+# Test scripts (for local use only)
+test_api.py
+test_booking.py
+test_both_strategies.py
+run_server.py
+view_database.py
+view_pinecone.py
+view_redis.py
+
+# Batch files
+START_BACKEND.bat
+
+# IDE
+.vscode/
