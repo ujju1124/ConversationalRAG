@@ -34,7 +34,6 @@ const ChatPage = () => {
     addMessage({ role: 'user', content: userMessage });
 
     try {
-      console.log('Sending message with document_id:', currentDocument?.document_id, 'session:', currentSession);
       const result = await send(userMessage);
       addMessage({
         role: 'assistant',

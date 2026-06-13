@@ -36,6 +36,33 @@ class ChatResponse(BaseModel):
     booking: Optional[BookingData] = None
 
 
+# Session History API schemas
+class SessionSummary(BaseModel):
+    """Response schema for session list."""
+    session_id: str
+    document_id: str
+    document_name: str
+    title: str
+    created_at: datetime
+    updated_at: datetime
+    message_count: int
+    
+    class Config:
+        from_attributes = True
+
+
+class MessageResponse(BaseModel):
+    """Response schema for individual message."""
+    id: int
+    role: str
+    content: str
+    has_booking: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
 # Internal schemas
 class ChunkMetadata(BaseModel):
     """Metadata for a document chunk."""

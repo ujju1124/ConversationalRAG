@@ -1,7 +1,7 @@
 """Main FastAPI application entry point."""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import ingest, chat
+from app.routers import ingest, chat, sessions
 from app.core.db import engine, Base
 
 # Create database tables
@@ -31,6 +31,7 @@ app.add_middleware(
 # Include routers
 app.include_router(ingest.router, tags=["Ingestion"])
 app.include_router(chat.router, tags=["Chat"])
+app.include_router(sessions.router, tags=["Sessions"])
 
 
 @app.get("/")
@@ -39,5 +40,5 @@ async def root():
     return {
         "status": "online",
         "message": "Conversational RAG Backend API is running",
-        "endpoints": ["/ingest", "/chat"]
+        "endpoints": ["/ingest", "/chat", "/sessions"]
     }
