@@ -1,4 +1,5 @@
 import { createContext, useState, useContext } from 'react';
+import { getSessionMessages } from '../services/api';
 
 const AppContext = createContext();
 
@@ -38,6 +39,33 @@ export const AppProvider = ({ children }) => {
     setMessages(prev => [...prev, message]);
   };
 
+  const loadSession = async (sessionId, documentId, documentName) => {
+    try {
+      // Fetch messages from backend
+      const sessionMessages = await getSessionMessages(sessionId);
+      
+      // Convert to frontend format
+      const formattedMessages = sessionMessages.map(msg => ({
+        role: msg.role,
+        content: msg.content,
+        booking: null, // We don't store booking in message list, only show when it happens
+      }));
+      
+      // Update context
+      setCurrentSession(sessionId);
+      setMessages(formattedMessages);
+      setCurrentDocument({
+        document_id: documentId,
+        filename: documentName,
+      });
+      
+      return true;
+    } catch (error) {
+      showToast(error.message, 'error');
+      return false;
+    }
+  };
+
   const value = {
     currentDocument,
     setCurrentDocument,
@@ -47,6 +75,7 @@ export const AppProvider = ({ children }) => {
     setMessages,
     resetSession,
     addMessage,
+    loadSession,
     toast,
     showToast,
     hideToast,
@@ -54,3 +83,4 @@ export const AppProvider = ({ children }) => {
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
+

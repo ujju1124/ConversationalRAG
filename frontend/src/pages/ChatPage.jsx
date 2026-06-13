@@ -18,6 +18,7 @@ const ChatPage = () => {
 
   const [input, setInput] = useState('');
   const { loading, send } = useChat(currentSession, currentDocument?.document_id);
+  const [sessionListKey, setSessionListKey] = useState(0); // Force sidebar refresh
 
   useEffect(() => {
     if (!currentDocument) {
@@ -40,6 +41,9 @@ const ChatPage = () => {
         content: result.response,
         booking: result.booking,
       });
+      
+      // Trigger sidebar refresh by updating key
+      setSessionListKey(prev => prev + 1);
     } catch (error) {
       // Error already shown by useChat hook
     }
@@ -50,10 +54,6 @@ const ChatPage = () => {
       e.preventDefault();
       handleSend();
     }
-  };
-
-  const handleNewSession = () => {
-    resetSession();
   };
 
   if (!currentDocument) {
@@ -68,11 +68,7 @@ const ChatPage = () => {
       />
 
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar
-          sessionId={currentSession}
-          documentId={currentDocument.document_id}
-          onNewSession={handleNewSession}
-        />
+        <Sidebar key={sessionListKey} />
 
         <div className="flex-1 flex flex-col">
           <ChatWindow messages={messages} loading={loading} />

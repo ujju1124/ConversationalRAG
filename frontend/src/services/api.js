@@ -46,4 +46,36 @@ export const sendMessage = async (sessionId, message, documentId) => {
   }
 };
 
+// ==================== SESSION HISTORY API ====================
+
+export const getSessions = async () => {
+  try {
+    const response = await api.get('/sessions');
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.detail || 'Failed to fetch sessions';
+    throw new Error(errorMessage);
+  }
+};
+
+export const getSessionMessages = async (sessionId) => {
+  try {
+    const response = await api.get(`/sessions/${sessionId}/messages`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.detail || 'Failed to fetch messages';
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteSession = async (sessionId) => {
+  try {
+    const response = await api.delete(`/sessions/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    const errorMessage = error.response?.data?.detail || 'Failed to delete session';
+    throw new Error(errorMessage);
+  }
+};
+
 export default api;
