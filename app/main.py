@@ -1,5 +1,6 @@
 """Main FastAPI application entry point."""
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routers import ingest, chat
 from app.core.db import engine, Base
 
@@ -11,6 +12,20 @@ app = FastAPI(
     title="Conversational RAG Backend",
     description="Production-ready backend with document ingestion and conversational RAG APIs",
     version="1.0.0"
+)
+
+# Configure CORS for frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",  # Vite default port
+        "http://localhost:3000",  # React default port
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Include routers

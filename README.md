@@ -4,6 +4,7 @@ A FastAPI backend system with document ingestion and conversational RAG (Retriev
 
 ## Features
 
+### Backend
 - **Document Ingestion API**: Upload PDF/TXT files and store them as vector embeddings
 - **Conversational RAG API**: Chat with documents using context-aware responses
 - **Booking Detection**: Automatically detect and extract interview booking information
@@ -11,9 +12,18 @@ A FastAPI backend system with document ingestion and conversational RAG (Retriev
 - **Vector Search**: Semantic search using Pinecone vector database
 - **Local Embeddings**: Generate embeddings locally using sentence-transformers
 
+### Frontend
+- **Modern React UI**: Dark-themed interface with glassmorphism effects
+- **Drag-and-Drop Upload**: Easy document upload with visual feedback
+- **Real-time Chat**: Conversational interface with typing indicators
+- **Booking Cards**: Visual display of detected booking information
+- **Responsive Design**: Works seamlessly on desktop and mobile
+- **Session Management**: Automatic session ID generation and management
+
 
 ## Tech Stack
 
+### Backend
 - **FastAPI**: Modern web framework for building APIs
 - **Groq API**: LLM text generation (llama3-8b-8192)
 - **sentence-transformers**: Local embedding generation (all-MiniLM-L6-v2)
@@ -22,6 +32,13 @@ A FastAPI backend system with document ingestion and conversational RAG (Retriev
 - **SQLite + SQLAlchemy**: Metadata and booking storage
 - **pdfplumber**: PDF text extraction
 - **NLTK**: Sentence tokenization
+
+### Frontend
+- **React 18**: Modern UI library with hooks
+- **Vite**: Fast build tool and dev server
+- **Tailwind CSS**: Utility-first styling framework
+- **React Router**: Client-side routing
+- **Axios**: HTTP client for API calls
 
 ## Project Structure
 
@@ -49,14 +66,16 @@ app/
 
 ## Setup Instructions
 
-### 1. Clone and Install Dependencies
+### Backend Setup
+
+#### 1. Clone and Install Dependencies
 
 ```bash
 # Install Python dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment Variables
+#### 2. Configure Environment Variables
 
 Copy `.env.example` to `.env` and fill in your API keys and configuration:
 
@@ -73,7 +92,7 @@ Required environment variables:
 - `UPSTASH_REDIS_TOKEN`: Your Upstash Redis token
 - `DATABASE_URL`: SQLite database path (default: `sqlite:///./app.db`)
 
-### 3. Run the Server
+#### 3. Run the Backend Server
 
 ```bash
 # Start the FastAPI server
@@ -83,6 +102,62 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 The API will be available at `http://localhost:8000`
 
 API documentation (Swagger UI): `http://localhost:8000/docs`
+
+---
+
+### Frontend Setup
+
+#### 1. Navigate to Frontend Directory
+
+```bash
+cd frontend
+```
+
+#### 2. Install Node Dependencies
+
+```bash
+npm install
+```
+
+#### 3. Run the Frontend Development Server
+
+```bash
+npm run dev
+```
+
+The frontend will be available at `http://localhost:5173`
+
+#### 4. Access the Application
+
+1. Open your browser and go to `http://localhost:5173`
+2. Upload a document (PDF or TXT) with your preferred chunking strategy
+3. Start chatting with your document!
+
+**Note**: Both backend (port 8000) and frontend (port 5173) must be running simultaneously.
+
+---
+
+### Quick Start (Both Servers)
+
+**Terminal 1 - Backend:**
+```bash
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
+
+**Estimated setup time**: ~10 minutes
+
+**All services use free tiers**:
+- Groq: https://console.groq.com
+- Pinecone: https://www.pinecone.io
+- Upstash: https://upstash.com
 
 ## API Endpoints
 
