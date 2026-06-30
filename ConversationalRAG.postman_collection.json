@@ -1,0 +1,543 @@
+{
+	"info": {
+		"_postman_id": "conversational-rag-api",
+		"name": "Conversational RAG API",
+		"description": "Complete API collection for testing the Conversational RAG Backend system. This collection includes endpoints for document ingestion, conversational chat with memory, booking detection, and session history management.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "session_id",
+			"value": "postman-test-session",
+			"type": "string"
+		},
+		{
+			"key": "document_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Test if the backend server is running and responsive."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"status\": \"online\",\n  \"message\": \"Conversational RAG Backend API is running\",\n  \"endpoints\": [\n    \"/ingest\",\n    \"/chat\",\n    \"/sessions\"\n  ]\n}"
+				}
+			]
+		},
+		{
+			"name": "2. Ingest Document (Sentence Strategy)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Save document_id to collection variable",
+							"var jsonData = pm.response.json();",
+							"pm.collectionVariables.set(\"document_id\", jsonData.document_id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "sample_document.txt",
+							"description": "Upload a PDF or TXT file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/ingest?strategy=sentence",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ingest"
+					],
+					"query": [
+						{
+							"key": "strategy",
+							"value": "sentence",
+							"description": "Chunking strategy: 'sentence' or 'fixed'"
+						}
+					]
+				},
+				"description": "Upload a document (PDF/TXT) and generate vector embeddings. Uses sentence-based chunking strategy. The document_id is automatically saved for use in subsequent requests."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "sample_document.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/ingest?strategy=sentence",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"ingest"
+							],
+							"query": [
+								{
+									"key": "strategy",
+									"value": "sentence"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"document_id\": \"7d4b9197-d256-481d-b5b2-a1ec2653d73d\",\n  \"filename\": \"sample_document.txt\",\n  \"chunk_count\": 21,\n  \"strategy\": \"sentence\"\n}"
+				}
+			]
+		},
+		{
+			"name": "3. Ingest Document (Fixed Strategy)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Save document_id to collection variable",
+							"var jsonData = pm.response.json();",
+							"pm.collectionVariables.set(\"document_id\", jsonData.document_id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "sample_document.txt",
+							"description": "Upload a PDF or TXT file"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/ingest?strategy=fixed",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ingest"
+					],
+					"query": [
+						{
+							"key": "strategy",
+							"value": "fixed",
+							"description": "Chunking strategy: 'sentence' or 'fixed'"
+						}
+					]
+				},
+				"description": "Upload a document with fixed-size chunking (500 chars with 50 char overlap)."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Chat - General Question",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"user_message\": \"What is machine learning?\",\n  \"document_id\": \"{{document_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/chat",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"chat"
+					]
+				},
+				"description": "Ask a general question about the uploaded document. The system retrieves relevant context and generates a response using RAG."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"postman-test-session\",\n  \"user_message\": \"What is machine learning?\",\n  \"document_id\": \"7d4b9197-d256-481d-b5b2-a1ec2653d73d\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chat",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chat"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"response\": \"Machine learning is a subset of AI that enables systems to learn and improve from experience.\",\n  \"session_id\": \"postman-test-session\",\n  \"booking\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "5. Chat - With Booking Detection",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"user_message\": \"I want to schedule an interview for Alice Johnson at alice.johnson@email.com on December 25th at 2:30 PM\",\n  \"document_id\": \"{{document_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/chat",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"chat"
+					]
+				},
+				"description": "Send a message with booking intent. The system automatically detects booking keywords, extracts structured information (name, email, date, time), and saves it to the database."
+			},
+			"response": [
+				{
+					"name": "Success Response with Booking",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"postman-test-session\",\n  \"user_message\": \"I want to schedule an interview for Alice Johnson at alice.johnson@email.com on December 25th at 2:30 PM\",\n  \"document_id\": \"7d4b9197-d256-481d-b5b2-a1ec2653d73d\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chat",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chat"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"response\": \"However, I notice that the preferred date you provided, December 25th, falls on a holiday and our interview slots are typically available from Monday to Friday. \\n\\nTo proceed with the interview scheduling, please confirm if you would like to schedule an alternative date and time within our business hours (Monday to Friday, 9 AM to 5 PM).\",\n  \"session_id\": \"postman-test-session\",\n  \"booking\": {\n    \"name\": \"Alice Johnson\",\n    \"email\": \"alice.johnson@email.com\",\n    \"date\": \"December 25th\",\n    \"time\": \"2:30 PM\"\n  }\n}"
+				}
+			]
+		},
+		{
+			"name": "6. Chat - Using Session Context",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"session_id\": \"{{session_id}}\",\n  \"user_message\": \"What types of machine learning did you mention?\",\n  \"document_id\": \"{{document_id}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/chat",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"chat"
+					]
+				},
+				"description": "Ask a follow-up question that references previous conversation. The system uses Redis to maintain session context and provides a coherent response based on chat history."
+			},
+			"response": [
+				{
+					"name": "Success Response with Context",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"postman-test-session\",\n  \"user_message\": \"What types of machine learning did you mention?\",\n  \"document_id\": \"7d4b9197-d256-481d-b5b2-a1ec2653d73d\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/chat",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"chat"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"response\": \"I mentioned three main types: supervised learning, unsupervised learning, and reinforcement learning.\",\n  \"session_id\": \"postman-test-session\",\n  \"booking\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "7. Get All Sessions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/sessions",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"sessions"
+					]
+				},
+				"description": "Retrieve all chat sessions ordered by most recent activity. Shows session metadata including title, document name, timestamps, and message count."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "[\n  {\n    \"session_id\": \"postman-test-session\",\n    \"document_id\": \"7d4b9197-d256-481d-b5b2-a1ec2653d73d\",\n    \"document_name\": \"sample_document.txt\",\n    \"title\": \"What is machine learning?\",\n    \"created_at\": \"2026-06-30T08:39:22.250357\",\n    \"updated_at\": \"2026-06-30T08:39:29.996189\",\n    \"message_count\": 6\n  },\n  {\n    \"session_id\": \"aeccb97e-6c5f-47d9-8e77-4470f437dd21\",\n    \"document_id\": \"a2fb479a-e2a1-41b6-87fb-cfda904f878d\",\n    \"document_name\": \"sample_document.txt\",\n    \"title\": \"hello\",\n    \"created_at\": \"2026-06-13T06:14:50.724667\",\n    \"updated_at\": \"2026-06-13T06:19:11.896354\",\n    \"message_count\": 6\n  }\n]"
+				}
+			]
+		},
+		{
+			"name": "8. Get Session Messages",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/sessions/postman-test-session/messages",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"sessions",
+						"postman-test-session",
+						"messages"
+					]
+				},
+				"description": "Retrieve all messages from a specific chat session in chronological order. Replace 'postman-test-session' with your actual session_id."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/postman-test-session/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"postman-test-session",
+								"messages"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "[\n  {\n    \"id\": 13,\n    \"role\": \"user\",\n    \"content\": \"What is machine learning?\",\n    \"has_booking\": false,\n    \"created_at\": \"2026-06-30T08:39:23.698901\"\n  },\n  {\n    \"id\": 14,\n    \"role\": \"assistant\",\n    \"content\": \"Machine learning is a subset of AI that enables systems to learn and improve from experience.\",\n    \"has_booking\": false,\n    \"created_at\": \"2026-06-30T08:39:23.705002\"\n  }\n]"
+				}
+			]
+		},
+		{
+			"name": "9. Delete Session",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/sessions/test-session-to-delete",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"sessions",
+						"test-session-to-delete"
+					]
+				},
+				"description": "Delete a chat session and all its messages from both database and Redis. Replace 'test-session-to-delete' with the actual session_id you want to remove."
+			},
+			"response": [
+				{
+					"name": "Success Response",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/sessions/test-session-to-delete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions",
+								"test-session-to-delete"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n  \"deleted\": true,\n  \"session_id\": \"test-session-to-delete\"\n}"
+				}
+			]
+		}
+	]
+}
