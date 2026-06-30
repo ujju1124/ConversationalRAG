@@ -6,6 +6,9 @@ __pycache__/
 venv/
 .venv/
 
+# Frontend (not part of backend-only project)
+frontend/
+
 # Utility MD files (for local reference only)
 CHECKLIST.md
 COMPLETE_PROGRAM_FLOW.md
