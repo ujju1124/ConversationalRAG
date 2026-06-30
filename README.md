@@ -2,7 +2,7 @@
 
 A production-ready FastAPI backend system with document ingestion and conversational RAG (Retrieval-Augmented Generation) capabilities. The system supports PDF and TXT file ingestion, semantic search using vector embeddings, intelligent conversation with chat memory, and automatic booking intent detection.
 
-> **Note**: This is a backend-only project built for the Palm Mind AI ML Intern application. A Postman collection and curl examples are provided for easy API verification without requiring a frontend.
+> **Note**: This is a backend-only project. A Postman collection and curl examples are provided for easy API verification without requiring a frontend.
 
 ## Features
 
@@ -472,7 +472,7 @@ Interactive API documentation is available at:
 
 ## Known Limitations
 
-This project was built as a learning exercise and proof-of-concept for the Palm Mind AI ML Intern application. While functional, it has several limitations:
+This project was built as a learning exercise and proof-of-concept. While functional, it has several limitations:
 
 ### Testing & Quality Assurance
 - **No automated tests**: No unit tests, integration tests, or end-to-end tests implemented
@@ -538,7 +538,7 @@ MIT
 
 ## Contact
 
-Built by **Ujwal** for Palm Mind AI ML Intern Application  
+Built by **Ujwal**  
 GitHub: [ujju1124](https://github.com/ujju1124)
 
 **Project Repository**: [ConversationalRAG](https://github.com/ujju1124/ConversationalRAG)
