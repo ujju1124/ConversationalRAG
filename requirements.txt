@@ -12,3 +12,9 @@ sqlalchemy>=2.0.25
 pdfplumber>=0.10.3
 nltk>=3.8.1
 requests>=2.31.0
+email-validator>=2.1.0
+
+# Development dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0

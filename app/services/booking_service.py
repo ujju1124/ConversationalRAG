@@ -6,20 +6,38 @@ from sqlalchemy.orm import Session
 from app.models.db_models import Booking
 from app.models.schemas import BookingData
 from app.services.llm_service import call_groq_api
+from app.core.logging_config import get_logger
 
+logger = get_logger(__name__)
 
 # Keywords for booking intent detection
 BOOKING_KEYWORDS = ["book", "schedule", "interview", "appointment", "available", "meeting", "slot"]
 
 
 def detect_booking_intent(user_message: str) -> bool:
-    """Check if user message contains booking-related keywords."""
+    """
+    Check if user message contains booking-related keywords.
+    
+    Args:
+        user_message: User's message text
+        
+    Returns:
+        True if booking keywords detected, False otherwise
+    """
     message_lower = user_message.lower()
     return any(keyword in message_lower for keyword in BOOKING_KEYWORDS)
 
 
 def extract_booking_info(conversation_messages: List[dict]) -> Optional[BookingData]:
-    """Extract booking information using Groq API with robust JSON parsing."""
+    """
+    Extract booking information using Groq API with robust JSON parsing.
+    
+    Args:
+        conversation_messages: List of conversation message dictionaries
+        
+    Returns:
+        BookingData if extraction successful, None otherwise
+    """
     
     # Build conversation context (last 5 messages including current)
     conversation_text = ""
@@ -67,22 +85,32 @@ Required format:
         # Only return if at least one field is present
         if all(v is None for v in [booking_data.name, booking_data.email, 
                                      booking_data.date, booking_data.time]):
-            print("Booking extraction: All fields are null, returning None")
+            logger.info("Booking extraction: All fields are null, returning None")
             return None
         
         return booking_data
         
     except json.JSONDecodeError as e:
-        print(f"Booking extraction error: Invalid JSON - {e}")
-        print(f"Response was: {response_clean}")
+        logger.warning(f"Booking extraction error: Invalid JSON - {e}")
+        logger.warning(f"Response was: {response_clean}")
         return None
     except Exception as e:
-        print(f"Booking extraction error: {e}")
+        logger.error(f"Booking extraction error: {e}", exc_info=True)
         return None
 
 
 def save_booking(db: Session, session_id: str, booking_data: BookingData) -> str:
-    """Save booking to SQLite database."""
+    """
+    Save booking to SQLite database.
+    
+    Args:
+        db: Database session
+        session_id: Chat session ID
+        booking_data: Extracted booking information
+        
+    Returns:
+        Generated booking ID
+    """
     booking_id = str(uuid.uuid4())
     
     booking = Booking(
@@ -102,7 +130,18 @@ def save_booking(db: Session, session_id: str, booking_data: BookingData) -> str
 
 def process_booking(db: Session, session_id: str, user_message: str, 
                    chat_history: List[dict]) -> Optional[BookingData]:
-    """Process booking intent: detect, extract, and save."""
+    """
+    Process booking intent: detect, extract, and save.
+    
+    Args:
+        db: Database session
+        session_id: Chat session ID
+        user_message: Current user message
+        chat_history: Previous conversation messages
+        
+    Returns:
+        BookingData if booking detected and extracted, None otherwise
+    """
     
     # Check for booking intent
     if not detect_booking_intent(user_message):

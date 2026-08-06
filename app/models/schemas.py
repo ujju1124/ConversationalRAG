@@ -1,5 +1,5 @@
 """Pydantic schemas for request and response validation."""
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 from datetime import datetime
 
@@ -24,7 +24,7 @@ class ChatRequest(BaseModel):
 class BookingData(BaseModel):
     """Schema for extracted booking information."""
     name: Optional[str] = None
-    email: Optional[str] = None
+    email: Optional[EmailStr] = None
     date: Optional[str] = None
     time: Optional[str] = None
 
