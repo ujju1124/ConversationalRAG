@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # FastAPI application
+  app:
+    build: .
+    container_name: conversational-rag-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Database
+      - DATABASE_URL=sqlite:///./app.db
+      
+      # External APIs (provide your own values in .env)
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+      
+      # Redis configuration
+      # For local development, use the local Redis container
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      # For production with Upstash, override these in .env:
+      # - UPSTASH_REDIS_URL=${UPSTASH_REDIS_URL}
+      # - UPSTASH_REDIS_TOKEN=${UPSTASH_REDIS_TOKEN}
+    volumes:
+      - ./app:/app/app
+      - ./app.db:/app/app.db
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # Local Redis for development
+  redis:
+    image: redis:7-alpine
+    container_name: conversational-rag-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    networks:
+      - rag-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  rag-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

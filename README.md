@@ -108,6 +108,74 @@ You should see:
 }
 ```
 
+---
+
+## Run with Docker
+
+The easiest way to run the application is using Docker Compose, which automatically sets up both the FastAPI app and a local Redis instance.
+
+### Prerequisites
+
+- Docker and Docker Compose installed
+- API keys for Groq and Pinecone (see `.env` configuration below)
+
+### Steps
+
+1. **Create `.env` file** with your API credentials:
+
+```bash
+cp .env.example .env
+# Edit .env and add your API keys
+```
+
+Required variables:
+- `GROQ_API_KEY`
+- `PINECONE_API_KEY`
+- `PINECONE_INDEX_NAME`
+
+For Docker, you can use the local Redis container instead of Upstash (optional):
+- `REDIS_HOST=redis` (handled automatically by docker-compose)
+- `REDIS_PORT=6379`
+
+2. **Build and start the containers**:
+
+```bash
+docker-compose up --build
+```
+
+This will:
+- Build the FastAPI application image
+- Start a local Redis container
+- Expose the API on `http://localhost:8000`
+- Expose Redis on `localhost:6379` (for debugging)
+
+3. **Verify the setup**:
+
+```bash
+curl http://localhost:8000/
+```
+
+4. **View logs**:
+
+```bash
+docker-compose logs -f app
+```
+
+5. **Stop the containers**:
+
+```bash
+docker-compose down
+```
+
+### Docker Notes
+
+- **Persistent data**: SQLite database and Redis data are stored in Docker volumes
+- **Hot reload**: The `/app` directory is mounted, so code changes reflect immediately
+- **Health checks**: Both services have health checks configured
+- **Production**: For production, use Upstash Redis by setting `UPSTASH_REDIS_URL` and `UPSTASH_REDIS_TOKEN` in `.env`
+
+---
+
 ## Try It Yourself
 
 The backend can be tested without a frontend using either **Postman** or **curl commands**. All examples below use real API responses captured from actual requests.
