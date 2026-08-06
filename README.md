@@ -2,6 +2,8 @@
 
 A production-ready FastAPI backend system with document ingestion and conversational RAG (Retrieval-Augmented Generation) capabilities. The system supports PDF and TXT file ingestion, semantic search using vector embeddings, intelligent conversation with chat memory, and automatic booking intent detection.
 
+> **Implementation Note**: This project implements RAG from scratch with **no LangChain**, **no RetrievalQAChain**, and **no FAISS/Chroma**. All RAG logic is custom-built using FastAPI, Pinecone for vector storage, and direct Groq API calls.
+
 ## Features
 
 - **Document Ingestion API**: Upload PDF/TXT files with configurable chunking strategies (sentence-based or fixed-size)
