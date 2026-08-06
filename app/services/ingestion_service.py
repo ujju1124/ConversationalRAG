@@ -2,8 +2,8 @@
 import pdfplumber
 import uuid
 from typing import List, Tuple
-from sentence_transformers import SentenceTransformer
-from app.core.pinecone_client import pinecone_index
+from app.core.embedding_model import generate_embeddings
+from app.core.pinecone_client import get_pinecone_index
 from app.models.db_models import Document
 from sqlalchemy.orm import Session
 import nltk
@@ -14,12 +14,21 @@ try:
 except LookupError:
     nltk.download('punkt')
 
-# Initialize embedding model (384 dimensions)
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
-    """Extract text from PDF or TXT file."""
+    """
+    Extract text from PDF or TXT file.
+    
+    Args:
+        file_content: Raw file bytes
+        filename: Name of the file (used to determine type)
+        
+    Returns:
+        Extracted text content
+        
+    Raises:
+        ValueError: If file type is not supported
+    """
     if filename.endswith('.pdf'):
         # Extract text from PDF using pdfplumber
         import io
@@ -38,7 +47,17 @@ def extract_text_from_file(file_content: bytes, filename: str) -> str:
 
 
 def chunk_text_fixed(text: str, chunk_size: int = 500, overlap: int = 50) -> List[str]:
-    """Split text into fixed-size chunks with overlap."""
+    """
+    Split text into fixed-size chunks with overlap.
+    
+    Args:
+        text: Text to chunk
+        chunk_size: Size of each chunk in characters
+        overlap: Number of overlapping characters between chunks
+        
+    Returns:
+        List of text chunks
+    """
     chunks = []
     start = 0
     text_length = len(text)
@@ -54,20 +73,32 @@ def chunk_text_fixed(text: str, chunk_size: int = 500, overlap: int = 50) -> Lis
 
 
 def chunk_text_sentence(text: str) -> List[str]:
-    """Split text on sentence boundaries using nltk."""
+    """
+    Split text on sentence boundaries using nltk.
+    
+    Args:
+        text: Text to chunk
+        
+    Returns:
+        List of sentences
+    """
     sentences = nltk.sent_tokenize(text)
     return [s.strip() for s in sentences if s.strip()]
 
 
-def generate_embeddings(chunks: List[str]) -> List[List[float]]:
-    """Generate embeddings for text chunks using sentence-transformers."""
-    embeddings = embedding_model.encode(chunks, convert_to_tensor=False)
-    return embeddings.tolist()
-
-
 def store_in_pinecone(chunks: List[str], embeddings: List[List[float]], 
                      filename: str, strategy: str, document_id: str) -> None:
-    """Store embeddings and metadata in Pinecone."""
+    """
+    Store embeddings and metadata in Pinecone.
+    
+    Args:
+        chunks: List of text chunks
+        embeddings: List of embedding vectors
+        filename: Source filename
+        strategy: Chunking strategy used
+        document_id: Unique document identifier
+    """
+    pinecone_index = get_pinecone_index()
     vectors = []
     
     for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
@@ -94,7 +125,16 @@ def store_in_pinecone(chunks: List[str], embeddings: List[List[float]],
 
 def save_document_metadata(db: Session, document_id: str, filename: str, 
                           chunk_count: int, strategy: str) -> None:
-    """Save document metadata to SQLite."""
+    """
+    Save document metadata to SQLite.
+    
+    Args:
+        db: Database session
+        document_id: Unique document identifier
+        filename: Source filename
+        chunk_count: Number of chunks created
+        strategy: Chunking strategy used
+    """
     document = Document(
         document_id=document_id,
         filename=filename,
@@ -106,7 +146,24 @@ def save_document_metadata(db: Session, document_id: str, filename: str,
 
 
 def ingest_document(file_content: bytes, filename: str, strategy: str, db: Session) -> Tuple[str, int]:
-    """Complete document ingestion pipeline."""
+    """
+    Complete document ingestion pipeline.
+    
+    This function runs synchronously and contains blocking I/O operations.
+    FastAPI will automatically run it in a threadpool when called from an async route.
+    
+    Args:
+        file_content: Raw file bytes
+        filename: Name of the file
+        strategy: Chunking strategy ('fixed' or 'sentence')
+        db: Database session
+        
+    Returns:
+        Tuple of (document_id, chunk_count)
+        
+    Raises:
+        ValueError: If strategy is invalid or file type is unsupported
+    """
     # Generate unique document ID
     document_id = str(uuid.uuid4())
     
