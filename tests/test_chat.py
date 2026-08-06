@@ -2,7 +2,7 @@
 import pytest
 
 
-def test_chat_endpoint_basic(test_client, mock_groq):
+def test_chat_endpoint_basic(test_client, mock_groq, mock_pinecone, mock_redis):
     """Test basic chat functionality with mocked dependencies."""
     # First create a document
     from io import BytesIO
@@ -32,6 +32,10 @@ def test_chat_endpoint_basic(test_client, mock_groq):
     assert "session_id" in data
     assert data["session_id"] == "test-session-1"
     assert "booking" in data
+    
+    # Verify mocks were actually used instead of real API calls
+    assert mock_pinecone.query.called, "Mock Pinecone query was not called - real API may have been used"
+    assert mock_redis.rpush.called, "Mock Redis rpush was not called - real Redis may have been used"
 
 
 def test_chat_with_invalid_document_id(test_client):

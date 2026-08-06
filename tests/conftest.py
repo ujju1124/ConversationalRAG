@@ -13,8 +13,11 @@ def mock_embedding_model(monkeypatch):
     def mock_get_model():
         return mock_model
     
+    # Patch at call sites where functions are imported
     monkeypatch.setattr("app.core.embedding_model.get_embedding_model", mock_get_model)
-    monkeypatch.setattr("app.core.embedding_model.generate_embeddings", 
+    monkeypatch.setattr("app.services.ingestion_service.generate_embeddings", 
+                        lambda texts: [[0.1] * 384 for _ in texts])
+    monkeypatch.setattr("app.services.retrieval_service.generate_embeddings", 
                         lambda texts: [[0.1] * 384 for _ in texts])
     return mock_model
 
@@ -50,7 +53,9 @@ def mock_pinecone(monkeypatch):
     ]
     mock_index.query.return_value = mock_query_response
     
-    monkeypatch.setattr("app.core.pinecone_client.get_pinecone_index", lambda: mock_index)
+    # Patch at call sites where function is imported
+    monkeypatch.setattr("app.services.ingestion_service.get_pinecone_index", lambda: mock_index)
+    monkeypatch.setattr("app.services.retrieval_service.get_pinecone_index", lambda: mock_index)
     return mock_index
 
 
@@ -80,8 +85,10 @@ def mock_redis(monkeypatch):
     mock_client.lrange.return_value = []
     mock_client.rpush.return_value = 1
     mock_client.delete.return_value = 1
+    mock_client.expire.return_value = True
     
-    monkeypatch.setattr("app.core.redis_client.get_redis_client", lambda: mock_client)
+    # Patch at call site where function is imported
+    monkeypatch.setattr("app.services.memory_service.get_redis_client", lambda: mock_client)
     return mock_client
 
 

@@ -3,7 +3,7 @@ import pytest
 from io import BytesIO
 
 
-def test_ingest_txt_file_fixed_strategy(test_client):
+def test_ingest_txt_file_fixed_strategy(test_client, mock_pinecone):
     """Test ingesting a TXT file with fixed chunking strategy."""
     # Create a simple test file
     test_content = "This is a test document. " * 50
@@ -20,9 +20,12 @@ def test_ingest_txt_file_fixed_strategy(test_client):
     assert data["filename"] == "test.txt"
     assert data["strategy"] == "fixed"
     assert data["chunk_count"] > 0
+    
+    # Verify mock was actually used instead of real Pinecone call
+    assert mock_pinecone.upsert.called, "Mock Pinecone upsert was not called - real API may have been used"
 
 
-def test_ingest_txt_file_sentence_strategy(test_client):
+def test_ingest_txt_file_sentence_strategy(test_client, mock_pinecone):
     """Test ingesting a TXT file with sentence chunking strategy."""
     test_content = "This is sentence one. This is sentence two. This is sentence three."
     file_data = BytesIO(test_content.encode('utf-8'))
@@ -38,6 +41,9 @@ def test_ingest_txt_file_sentence_strategy(test_client):
     assert data["filename"] == "test.txt"
     assert data["strategy"] == "sentence"
     assert data["chunk_count"] >= 3  # At least 3 sentences
+    
+    # Verify mock was actually used instead of real Pinecone call
+    assert mock_pinecone.upsert.called, "Mock Pinecone upsert was not called - real API may have been used"
 
 
 def test_ingest_invalid_strategy(test_client):
