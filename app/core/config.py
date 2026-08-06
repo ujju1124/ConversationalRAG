@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str
     PINECONE_INDEX_NAME: str
     UPSTASH_REDIS_URL: str
-    UPSTASH_REDIS_TOKEN: str
+    UPSTASH_REDIS_TOKEN: Optional[str] = None  # Optional for local Redis without auth
     DATABASE_URL: str = "sqlite:///./app.db"
     
     class Config:

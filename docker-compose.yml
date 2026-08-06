@@ -16,14 +16,13 @@ services:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
       
-      # Redis configuration
-      # For local development, use the local Redis container
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      # Redis configuration - uses local Redis container by default
+      - UPSTASH_REDIS_URL=redis://redis:6379
+      # UPSTASH_REDIS_TOKEN is not set for local Redis (no auth)
       
-      # For production with Upstash, override these in .env:
-      # - UPSTASH_REDIS_URL=${UPSTASH_REDIS_URL}
-      # - UPSTASH_REDIS_TOKEN=${UPSTASH_REDIS_TOKEN}
+      # To use Upstash Redis instead, add these to your .env file:
+      # UPSTASH_REDIS_URL=rediss://your-upstash-url.upstash.io
+      # UPSTASH_REDIS_TOKEN=your_upstash_token
     volumes:
       - ./app:/app/app
       - ./app.db:/app/app.db
