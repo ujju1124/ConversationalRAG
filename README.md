@@ -133,9 +133,14 @@ Required variables:
 - `PINECONE_API_KEY`
 - `PINECONE_INDEX_NAME`
 
-For Docker, you can use the local Redis container instead of Upstash (optional):
-- `REDIS_HOST=redis` (handled automatically by docker-compose)
-- `REDIS_PORT=6379`
+**Redis Configuration:**
+- Local Redis works out of the box via docker-compose (no configuration needed)
+- The app automatically connects to `redis://redis:6379` in Docker
+- To use Upstash Redis instead, add these to your `.env`:
+  ```
+  UPSTASH_REDIS_URL=rediss://your-instance.upstash.io
+  UPSTASH_REDIS_TOKEN=your_token
+  ```
 
 2. **Build and start the containers**:
 
@@ -172,7 +177,8 @@ docker-compose down
 - **Persistent data**: SQLite database and Redis data are stored in Docker volumes
 - **Hot reload**: The `/app` directory is mounted, so code changes reflect immediately
 - **Health checks**: Both services have health checks configured
-- **Production**: For production, use Upstash Redis by setting `UPSTASH_REDIS_URL` and `UPSTASH_REDIS_TOKEN` in `.env`
+- **Local Redis**: Works out of the box with no configuration needed
+- **Production Redis**: Override `UPSTASH_REDIS_URL` and `UPSTASH_REDIS_TOKEN` in `.env` to use Upstash
 
 ---
 
@@ -543,7 +549,7 @@ Interactive API documentation is available at:
 This project was built as a learning exercise and proof-of-concept. While functional, it has several limitations:
 
 ### Testing & Quality Assurance
-- **No automated tests**: No unit tests, integration tests, or end-to-end tests implemented
+- **Automated test suite**: Pytest suite with 16 tests covering ingestion, chat, and booking flows
 - **No CI/CD pipeline**: Manual deployment and testing only
 - **Limited error handling**: Basic try-catch blocks, not comprehensive
 - **No load testing**: Performance under concurrent requests not measured
@@ -565,10 +571,10 @@ This project was built as a learning exercise and proof-of-concept. While functi
 ### Production Readiness
 - **No authentication**: All endpoints publicly accessible
 - **No rate limiting**: Vulnerable to abuse
-- **No monitoring**: No logging, metrics, or alerting
+- **Structured logging**: Centralized logging with proper log levels
 - **SQLite in production**: Not recommended for concurrent writes
 - **Secrets in .env**: No secrets management system
-- **No Docker setup**: Manual Python environment required
+- **Docker support**: Dockerfile and docker-compose for local development
 - **No CORS configuration**: Not configured for cross-origin requests
 
 ### Scalability
@@ -591,8 +597,10 @@ Despite these limitations, the system successfully demonstrates:
 ✅ Structured LLM outputs with Pydantic  
 ✅ RESTful API design with FastAPI  
 ✅ Dual chunking strategies  
+✅ Automated test suite with mocked external dependencies  
+✅ Docker containerization for local development  
 
-Future improvements would focus on testing, production hardening, and scalability enhancements.
+Future improvements would focus on authentication, monitoring, scalability, and production hardening.
 
 
 
