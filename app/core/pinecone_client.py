@@ -1,10 +1,11 @@
 """Pinecone vector database client initialization."""
 from pinecone import Pinecone, ServerlessSpec, Index
 from app.core.config import settings
+from typing import Optional
 
 # Global Pinecone client and index (lazy-loaded)
-_pc: Pinecone | None = None
-_pinecone_index: Index | None = None
+_pc: Optional[Pinecone] = None
+_pinecone_index: Optional[Index] = None
 
 
 def get_pinecone_client() -> Pinecone:

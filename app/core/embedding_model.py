@@ -1,9 +1,9 @@
 """Centralized embedding model initialization."""
 from sentence_transformers import SentenceTransformer
-from typing import List
+from typing import List, Optional
 
 # Global embedding model instance (loaded once)
-_embedding_model: SentenceTransformer | None = None
+_embedding_model: Optional[SentenceTransformer] = None
 
 
 def get_embedding_model() -> SentenceTransformer:
