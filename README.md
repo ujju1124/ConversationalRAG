@@ -2,8 +2,6 @@
 
 A production-ready FastAPI backend system with document ingestion and conversational RAG (Retrieval-Augmented Generation) capabilities. The system supports PDF and TXT file ingestion, semantic search using vector embeddings, intelligent conversation with chat memory, and automatic booking intent detection.
 
-> **Note**: This is a backend-only project. A Postman collection and curl examples are provided for easy API verification without requiring a frontend.
-
 ## Features
 
 - **Document Ingestion API**: Upload PDF/TXT files with configurable chunking strategies (sentence-based or fixed-size)
