@@ -9,10 +9,15 @@ from sqlalchemy.orm import Session
 import nltk
 
 # Download nltk sentence tokenizer data
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
+# Since NLTK 3.8.2, sent_tokenize also requires punkt_tab
+for resource in ("punkt", "punkt_tab"):
+    try:
+        nltk.data.find(f"tokenizers/{resource}")
+    except LookupError:
+        try:
+            nltk.download(resource, quiet=True)
+        except Exception:
+            pass  # some nltk versions don't have punkt_tab at all; punkt alone may suffice
 
 
 def extract_text_from_file(file_content: bytes, filename: str) -> str:
